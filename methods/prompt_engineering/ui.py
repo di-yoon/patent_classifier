@@ -3,6 +3,7 @@ import streamlit as st, pandas as pd, time
 from . import prompts, results
 from .client import LMStudioClient
 from utils.db_utils import save_prompt_results
+from .optimizer import optimize_prompt
 
 class PromptUI:
     def __init__(self):
@@ -15,13 +16,20 @@ class PromptUI:
 
         # === Data prep ===
         with st.expander("**DATA PREPARATION**", expanded=True):
-            st.dataframe(df.head(), use_container_width=True)
+            st.dataframe(df.head(), width='stretch')
             st.metric("ROWS", len(df))
             sel = st.multiselect("COLUMNS TO INCLUDE", df.columns.tolist())
             sep = ""
             if len(sel)>1:
                 m = st.selectbox("MERGE METHOD", ["SPACE","LINE BREAKS","CUSTOM"])
                 sep = " " if m=="SPACE" else "\n" if m=="LINE BREAKS" else st.text_input("DELIMITER"," | ")
+
+        # === API ===
+        client = LMStudioClient()
+        with st.expander("**LM STUDIO SETTING**"):
+            st.text_input("BASE URL", value=client.api_url, key="api_url")
+            st.text_input("MODEL", value=client.api_model, key="api_model")
+            if st.button("API CONNECTION"): client.connect()
 
         # === Category ===
         # 세션 초기화
@@ -54,19 +62,17 @@ class PromptUI:
         # === Prompt ===
         with st.expander("**PROMPT TEMPLATE**"):
             st.session_state.main_prompt=st.text_area("CLASSIFICATION PROMPT",st.session_state.main_prompt,height=400)
-            col1,col2=st.columns(2)
+            col1,col2,col3=st.columns(3)
             if col1.button("RESET EMPTY"): st.session_state.main_prompt=""; st.rerun()
             if col2.button("LOAD SAMPLE"): st.session_state.main_prompt=prompts.SAMPLE_PROMPT; st.rerun()
-
-        # === API ===
-        client=LMStudioClient()
-        with st.expander("**LM STUDIO SETTING**"):
-            st.text_input("BASE URL",value=client.api_url,key="api_url")
-            st.text_input("MODEL",value=client.api_model,key="api_model")
-            if st.button("API CONNECTION"): client.connect()
+            if col3.button("OPTIMIZE PROMPT"):
+                optimized = optimize_prompt(st.session_state.main_prompt)
+                st.session_state.main_prompt = optimized
+                st.success("프롬프트가 최적화되었습니다 ")
+                st.rerun()
 
         # === Run ===
-        if st.button("**C L A S S I F Y**",use_container_width=True):
+        if st.button("**C L A S S I F Y**",width='stretch'):
             if not st.session_state.get("api_connection_success"):
                 st.warning("Connect API first"); return
             texts=df[sel].astype(str).agg(sep.join,axis=1) if len(sel)>1 else df[sel[0]].astype(str)
@@ -85,7 +91,7 @@ class PromptUI:
         # === Results ===
         if st.session_state.classification_results:
             dfres = pd.DataFrame(st.session_state.classification_results)
-            st.dataframe(dfres, use_container_width=True)
+            st.dataframe(dfres, width='stretch')
             st.bar_chart(dfres["classification"].value_counts())
             results.export_excel(dfres, dfres.groupby("classification"))
 

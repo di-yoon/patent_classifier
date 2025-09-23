@@ -31,7 +31,7 @@ def show():
                     "id": "Run ID", "timestamp": "Time",
                     "model_name": "Model", "accuracy": "Acc"
                 }, inplace=True)
-                st.dataframe(display_df, use_container_width=True, height=400, hide_index=True)
+                st.dataframe(display_df, width='stretch', height=400, hide_index=True)
 
             with col2:
                 st.markdown("**상세보기 & 삭제**")
@@ -63,7 +63,7 @@ def show():
                     {"Key": "Output Dir", "Value": row["output_dir"]},
                     {"Key": "Timestamp", "Value": format_kst(row["timestamp"])},
                 ]
-                st.dataframe(pd.DataFrame(info_rows), use_container_width=True, hide_index=True)
+                st.dataframe(pd.DataFrame(info_rows), width='stretch', hide_index=True)
 
                 # 파라미터 표시
                 import json
@@ -75,7 +75,7 @@ def show():
                         if cfg:
                             rows = [{"Parameter": k, "Value": v} for k, v in cfg.items()]
                             st.markdown(f"**{title}**")
-                            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+                            st.dataframe(pd.DataFrame(rows), width='stretch', hide_index=True)
                         else:
                             st.write(f"{title}: (no data)")
                     except Exception as e:
@@ -97,7 +97,7 @@ def show():
                     "id": "Run ID", "timestamp": "Time",
                     "model_name": "Model", "selected_col": "Column"
                 }, inplace=True)
-                st.dataframe(display_df, use_container_width=True, height=250, hide_index=True)
+                st.dataframe(display_df, width='stretch', height=250, hide_index=True)
 
             with col2:
                 st.markdown("**상세보기 & 삭제**")
@@ -127,7 +127,7 @@ def show():
                 else:
                     cols = [c for c in ["출원번호", "예측_라벨", "신뢰도"] if c in run_results.columns]
                     st.dataframe(run_results[cols] if cols else run_results,
-                                 use_container_width=True, height=400, hide_index=True)
+                                 width='stretch', height=400, hide_index=True)
 
                     if "예측_라벨" in run_results.columns:
                         st.subheader("PREDICTION DISTRIBUTION")
@@ -149,7 +149,7 @@ def show():
                     "id": "Run ID", "timestamp": "Time",
                     "num_categories": "Num Categories"
                 }, inplace=True)
-                st.dataframe(display_df, use_container_width=True, height=250, hide_index=True)
+                st.dataframe(display_df, width='stretch', height=250, hide_index=True)
 
             with col2:
                 st.markdown("**상세보기 & 삭제**")
@@ -178,7 +178,7 @@ def show():
                     categories = json.loads(row.get("categories", "{}"))
                     if isinstance(categories, dict) and categories:
                         cat_rows = [{"Code": k, "Description": v} for k, v in categories.items()]
-                        st.dataframe(pd.DataFrame(cat_rows), use_container_width=True, hide_index=True)
+                        st.dataframe(pd.DataFrame(cat_rows), width='stretch', hide_index=True)
                     else:
                         st.write("카테고리 정보가 없습니다.")
                 except Exception:
@@ -197,7 +197,7 @@ def show():
                 else:
                     cols = [c for c in ["text", "classification"] if c in run_results.columns]
                     st.dataframe(run_results[cols] if cols else run_results,
-                                 use_container_width=True, height=400)
+                                 width='stretch', height=400)
 
                     if "classification" in run_results.columns:
                         st.subheader("분류 결과 분포")

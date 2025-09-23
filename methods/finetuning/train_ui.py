@@ -98,7 +98,7 @@ def show():
             output_dir = st.text_input("output_dir", value=default_outdir)
 
     # Train Button
-    if st.button("**T R A I N**", type="primary", use_container_width=True):
+    if st.button("**T R A I N**", type="primary", width='stretch'):
         trainer = None
         eval_results = {}
 

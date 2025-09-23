@@ -117,7 +117,7 @@ def show():
             st.warning("지정된 경로에 모델이 존재하지 않습니다.")
 
     #  추론 실행
-    if st.button("**I N F E R E N C E**", type="primary", use_container_width=True, disabled=not model_exists):
+    if st.button("**I N F E R E N C E**", type="primary", width='stretch', disabled=not model_exists):
         try:
             model_name = st.session_state.get('ft_model_name', 'google/gemma-2-2b')
             hf_token = st.session_state.get('ft_hf_token') or os.getenv('HF_TOKEN')
@@ -136,7 +136,7 @@ def show():
             st.toast("INFERENCE IS COMPLETE")
 
             st.subheader("INFERENCE RESULT")
-            st.dataframe(results_df, use_container_width=True)
+            st.dataframe(results_df, width='stretch')
 
             st.subheader("PREDICTION DISTRIBUTION")
             pred_counts = results_df['예측_라벨'].value_counts()
