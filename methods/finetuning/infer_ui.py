@@ -135,12 +135,38 @@ def show():
 
             st.toast("INFERENCE IS COMPLETE")
 
-            st.subheader("INFERENCE RESULT")
+            st.subheader("INFERENCE RESULT (Raw)")
             st.dataframe(results_df, width='stretch')
 
-            st.subheader("PREDICTION DISTRIBUTION")
-            pred_counts = results_df['예측_라벨'].value_counts()
-            st.bar_chart(pred_counts)
+            # 🔍 결과 필터링 UI
+            with st.expander("🔍 결과 필터링", expanded=True):
+                unique_labels = results_df["예측_라벨"].unique().tolist() if "예측_라벨" in results_df.columns else []
+                selected_labels = st.multiselect("라벨 선택", unique_labels, default=unique_labels)
+
+                conf_min, conf_max = 0.0, 1.0
+                if "신뢰도" in results_df.columns:
+                    conf_range = st.slider("신뢰도 범위", 0.0, 1.0, (0.0, 1.0), step=0.05)
+                    conf_min, conf_max = conf_range
+
+                search_id = st.text_input("출원번호 검색", "")
+
+            # === 필터 적용 ===
+            filtered = results_df.copy()
+            if selected_labels:
+                filtered = filtered[filtered["예측_라벨"].isin(selected_labels)]
+            if "신뢰도" in filtered.columns:
+                filtered = filtered[(filtered["신뢰도"] >= conf_min) & (filtered["신뢰도"] <= conf_max)]
+            if search_id:
+                filtered = filtered[filtered["출원번호"].astype(str).str.contains(search_id)]
+
+            # 결과 테이블
+            st.subheader("FILTERED RESULT")
+            st.dataframe(filtered, width='stretch')
+
+            # 분포 차트
+            if "예측_라벨" in filtered.columns:
+                st.subheader("PREDICTION DISTRIBUTION (Filtered)")
+                st.bar_chart(filtered["예측_라벨"].value_counts())
 
             st.session_state.inference_results = results_df
             excel_download.show_finetuning(results_df)

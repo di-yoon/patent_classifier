@@ -4,7 +4,7 @@ import requests, streamlit as st
 class LMStudioClient:
     def __init__(self, api_url=None, api_model=None):
         self.api_url = api_url or st.session_state.get("api_url", "http://localhost:1234/v1/chat/completions")
-        self.api_model = api_model or st.session_state.get("api_model", "qwen/qwen3-14b")
+        self.api_model = api_model or st.session_state.get("api_model")
 
     def connect(self):
         try:
@@ -22,20 +22,34 @@ class LMStudioClient:
         st.session_state.api_connection_success = False
         return False
 
-    def classify(self, text, candidates, prompt_template):
-        candidate_text = "\n".join([f"{c}: {d}" for c,d in candidates.items()])
-        prompt = prompt_template.format(text=text, candidate_text=candidate_text)
+    def classify(self, text: str, optimized_prompt: str) -> str:
+        """
+        분류 실행 함수.
+        - optimized_prompt: 옵티마이저가 만든 프롬프트 (카테고리 후보 포함)
+        - text: 분류할 실제 텍스트
+        """
+        full_prompt = f"""{optimized_prompt}
+
+    [분류할 텍스트]
+    {text}
+    """
+
+        payload = {
+            "model": self.api_model,
+            "messages": [
+                {"role": "system", "content": "당신은 텍스트를 분류하는 전문가입니다."},
+                {"role": "user", "content": full_prompt}
+            ],
+            "temperature": 0,
+            "max_tokens": 200
+        }
+
         try:
-            r = requests.post(self.api_url, json={
-                "model": self.api_model,
-                "messages":[
-                    {"role":"system","content":"당신은 특허 문서를 분류코드 체계로 분류하는 전문가입니다."},
-                    {"role":"user","content":prompt}
-                ],
-                "temperature":0, "max_tokens":15
-            }, timeout=60)
-            if r.status_code==200:
-                return r.json()['choices'][0]['message']['content'].strip()
+            r = requests.post(self.api_url, json=payload, timeout=60)
+            if r.status_code == 200:
+                result = r.json()["choices"][0]["message"]["content"].strip()
+                return result
+            else:
+                return f"Error: {r.status_code} {r.text}"
         except Exception as e:
-            st.error(e)
-        return "ERROR"
+            return f"Exception: {str(e)}"

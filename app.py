@@ -19,7 +19,7 @@ st.markdown("---")
 # 공통 세션 초기값
 _defaults = {
     "api_url": "http://localhost:1234/v1/chat/completions",
-    "api_model": "qwen/qwen3-14b",
+    "api_model": None,
     "classification_results": None,
     "model_loaded": False,
     "tokenizer": None,

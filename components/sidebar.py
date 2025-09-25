@@ -31,10 +31,10 @@ def show():
                 selected_sheet = st.sidebar.selectbox("CHOOSE SHEET", sheet_names)
                 df = pd.read_excel(uploaded_file, sheet_name=selected_sheet)
 
-            # ✅ 업로드 완료 메시지
+            #
             st.sidebar.success("데이터 업로드 완료")
 
-            # ✅ 자동 컬럼 매핑 추천
+            #
             default_cols = [col for col in ["발명의 명칭", "요약", "전체청구항"] if col in df.columns]
             st.session_state.default_cols = default_cols
 
@@ -53,10 +53,11 @@ def show():
         1. CLASSIFICATION METHOD
         2. UPLOAD DATA
         3. DATA PREPARATION _ COLUMNS TO INCLUDE IN PROMPT
-        4. CATEGORY TO CLASSIFY
-        5. PROMPT TEMPLATE
-        6. LM STUDIO SETTING
-        7. CLASSIFY
+        4. LM STUDIO SETTING
+        5. CATEGORY TO CLASSIFY
+        6. PROMPT TEMPLATE
+        7. PROMPT OPTIMIZE
+        8. CLASSIFY
         """)
     elif classification_method == "FINE TUNING":
         st.sidebar.title("[ HOW TO USE ]")

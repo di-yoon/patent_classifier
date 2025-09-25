@@ -27,8 +27,8 @@ class PromptUI:
         # === API ===
         client = LMStudioClient()
         with st.expander("**LM STUDIO SETTING**"):
-            st.text_input("BASE URL", value=client.api_url, key="api_url")
-            st.text_input("MODEL", value=client.api_model, key="api_model")
+            st.text_input("BASE URL", value="http://localhost:1234/v1/chat/completions", disabled=True)
+            st.text_input("MODEL", key="api_model")
             if st.button("API CONNECTION"): client.connect()
 
         # === Category ===
@@ -66,26 +66,47 @@ class PromptUI:
             if col1.button("RESET EMPTY"): st.session_state.main_prompt=""; st.rerun()
             if col2.button("LOAD SAMPLE"): st.session_state.main_prompt=prompts.SAMPLE_PROMPT; st.rerun()
             if col3.button("OPTIMIZE PROMPT"):
-                optimized = optimize_prompt(st.session_state.main_prompt)
+                optimized = optimize_prompt(st.session_state.main_prompt, st.session_state.categories)  # ✅ 카테고리 반영
                 st.session_state.main_prompt = optimized
                 st.success("프롬프트가 최적화되었습니다 ")
                 st.rerun()
 
         # === Run ===
-        if st.button("**C L A S S I F Y**",width='stretch'):
-            if not st.session_state.get("api_connection_success"):
-                st.warning("Connect API first"); return
-            texts=df[sel].astype(str).agg(sep.join,axis=1) if len(sel)>1 else df[sel[0]].astype(str)
-            results_data=[]
-            prog=st.progress(0)
-            for i,t in enumerate(texts.dropna()):
-                cls = client.classify(t, st.session_state.categories, st.session_state.main_prompt)
+        if st.button("**C L A S S I F Y**", width='stretch'):
+            if not st.session_state.get("api_model"):
+                st.warning("LMStudio에서 사용할 모델명을 입력하세요.")
+                return
+
+            if not sel:
+                st.warning("Please select at least one column to include.")
+                return
+
+            # --- 카테고리 텍스트 구성 ---
+            categories = st.session_state.categories
+            candidate_text = "\n".join([f"{c}: {d}" for c, d in categories.items() if c.strip()])
+
+            # --- 실제 프롬프트 구성 ---
+            optimized_prompt = f"""{st.session_state.main_prompt}
+
+        [분류 카테고리 후보]
+        {candidate_text}
+        """
+            texts = df[sel].astype(str).agg(sep.join, axis=1) if len(sel) > 1 else df[sel[0]].astype(str)
+
+            results_data = []
+            prog = st.progress(0)
+            for i, t in enumerate(texts.dropna()):
+                cls = client.classify(t, optimized_prompt)
                 results_data.append({
-                    "index":i,"text":t,"classification":cls,
-                    "preview":t[:100]+"..." if len(t)>100 else t
+                    "index": i,
+                    "text": t,
+                    "classification": cls,
+                    "preview": t[:100] + "..." if len(t) > 100 else t
                 })
-                prog.progress((i+1)/len(texts)); time.sleep(0.2)
-            st.session_state.classification_results=results_data
+                prog.progress((i + 1) / len(texts))
+                time.sleep(0.2)
+
+            st.session_state.classification_results = results_data
             st.toast("DONE")
 
         # === Results ===

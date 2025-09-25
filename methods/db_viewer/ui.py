@@ -126,12 +126,36 @@ def show():
                     st.warning("해당 Run ID에 대한 저장된 결과가 없습니다.")
                 else:
                     cols = [c for c in ["출원번호", "예측_라벨", "신뢰도"] if c in run_results.columns]
-                    st.dataframe(run_results[cols] if cols else run_results,
+
+                    # 🔍 필터링 UI 추가
+                    with st.expander("🔍 결과 필터링", expanded=True):
+                        unique_labels = run_results["예측_라벨"].unique().tolist() if "예측_라벨" in run_results.columns else []
+                        selected_labels = st.multiselect("라벨 선택", unique_labels, default=unique_labels)
+
+                        conf_min, conf_max = 0.0, 1.0
+                        if "신뢰도" in run_results.columns:
+                            conf_range = st.slider("신뢰도 범위", 0.0, 1.0, (0.0, 1.0), step=0.05)
+                            conf_min, conf_max = conf_range
+
+                        search_id = st.text_input("출원번호 검색", "")
+
+                    # === 필터 적용 ===
+                    filtered = run_results.copy()
+                    if selected_labels:
+                        filtered = filtered[filtered["예측_라벨"].isin(selected_labels)]
+                    if "신뢰도" in filtered.columns:
+                        filtered = filtered[(filtered["신뢰도"] >= conf_min) & (filtered["신뢰도"] <= conf_max)]
+                    if search_id:
+                        filtered = filtered[filtered["출원번호"].astype(str).str.contains(search_id)]
+
+                    # 결과 테이블 표시
+                    st.dataframe(filtered[cols] if cols else filtered,
                                  width='stretch', height=400, hide_index=True)
 
-                    if "예측_라벨" in run_results.columns:
-                        st.subheader("PREDICTION DISTRIBUTION")
-                        st.bar_chart(run_results["예측_라벨"].value_counts())
+                    # 분포 차트도 필터 반영
+                    if "예측_라벨" in filtered.columns:
+                        st.subheader("PREDICTION DISTRIBUTION (Filtered)")
+                        st.bar_chart(filtered["예측_라벨"].value_counts())
 
         else:
             st.info("아직 저장된 추론 실행 기록이 없습니다.")
