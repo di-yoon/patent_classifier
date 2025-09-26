@@ -1,9 +1,6 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
 from . import train_ui, infer_ui
-
-load_dotenv()
 
 def show():
     if st.session_state.uploaded_df is not None:

@@ -1,6 +1,5 @@
 # utils/db_utils.py
 import sqlite3, json
-
 from methods.db_viewer.schema import TRAIN_DB_PATH, INFER_DB_PATH, PROMPT_DB_PATH
 
 # train

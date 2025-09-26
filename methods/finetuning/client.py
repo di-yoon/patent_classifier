@@ -4,13 +4,11 @@ import torch
 from datasets import Dataset
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, BitsAndBytesConfig, DataCollatorWithPadding
 from peft import PeftModel
-import torch.nn.functional as F
 import pickle
-from dotenv import load_dotenv
-from utils.data_proceesor import DataProcessor
+
 
 # .env 파일 로드
-load_dotenv()
+
 
 class FineTuningInference:
     def __init__(self, model_name="google/gemma-2-2b", hf_token=None):

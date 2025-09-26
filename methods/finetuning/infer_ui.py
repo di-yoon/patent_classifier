@@ -1,10 +1,8 @@
 import os, glob, streamlit as st
-from dotenv import load_dotenv
 from methods.finetuning.client import FineTuningInference
 from utils import excel_download
 from utils.db_utils import init_infer_db, save_inference_results
 
-load_dotenv()
 def show():
     with st.expander("**COLUMN TO USE FOR INFERENCE**", expanded=True):
 

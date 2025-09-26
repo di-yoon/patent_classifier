@@ -1,11 +1,9 @@
 # methods/finetuning/train_ui.py
 import os, streamlit as st
-from dotenv import load_dotenv
+
 from utils.data_proceesor import DataProcessor
 from methods.finetuning.trainer import FineTuningTrainer
 from utils.db_utils import init_train_db, save_train_results
-
-load_dotenv()
 
 def show():
     with st.expander("**COLUMNS TO USE FOR TRAIN**", expanded=True):

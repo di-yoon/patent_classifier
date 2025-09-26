@@ -1,5 +1,4 @@
 from components import sidebar
-from dotenv import load_dotenv
 from methods.finetuning import ui as finetuning
 from methods.prompt_engineering.ui import PromptUI
 import streamlit as st
@@ -9,7 +8,7 @@ from utils.db_utils import init_train_db, init_infer_db, init_prompt_db
 init_train_db()
 init_infer_db()
 init_prompt_db()
-load_dotenv()
+
 
 st.set_page_config(page_title="특허 문서 분류 자동화 플랫폼", layout="wide")
 

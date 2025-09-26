@@ -127,8 +127,8 @@ def show():
                 else:
                     cols = [c for c in ["출원번호", "예측_라벨", "신뢰도"] if c in run_results.columns]
 
-                    # 🔍 필터링 UI 추가
-                    with st.expander("🔍 결과 필터링", expanded=True):
+                    # 필터링 UI
+                    with st.expander("결과 필터링", expanded=True):
                         unique_labels = run_results["예측_라벨"].unique().tolist() if "예측_라벨" in run_results.columns else []
                         selected_labels = st.multiselect("라벨 선택", unique_labels, default=unique_labels)
 

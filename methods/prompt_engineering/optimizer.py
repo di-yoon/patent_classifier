@@ -3,7 +3,7 @@ import requests, streamlit as st
 from .client import LMStudioClient
 
 def _call_llm(messages, max_tokens=700):
-    """LMStudio API 호출 공통 함수"""
+    """ API 호출 """
     client = LMStudioClient()
     try:
         r = requests.post(client.api_url, json={
@@ -23,13 +23,6 @@ def _call_llm(messages, max_tokens=700):
 
 
 def optimize_prompt(raw_prompt: str, categories: dict) -> str:
-    """
-    사용자 프롬프트(raw_prompt) + 카테고리(categories)를 기반으로
-    분류 작업에 최적화된 프롬프트 생성.
-    - 카테고리 키(c)는 숫자/문자 구분 없이 그대로 결과에 사용됨
-    - 설명(d)은 분류 기준 제시에 활용
-    """
-
     # 카테고리 후보 문자열 생성 (사용자 입력 그대로 반영)
     candidate_text = "\n".join([
         f"{c}: {d}" for c, d in categories.items() if c.strip()
@@ -91,7 +84,7 @@ def optimize_prompt(raw_prompt: str, categories: dict) -> str:
     if not stage_output:
         return raw_prompt
 
-    # 후처리: '당신은' 또는 'You are' 로 시작하는 줄부터 반환
+    #'당신은' 또는 'You are' 로 시작하는 줄부터 반환
     lines = stage_output.splitlines()
     for i, line in enumerate(lines):
         if line.strip().startswith("당신은") or line.strip().lower().startswith("you are"):

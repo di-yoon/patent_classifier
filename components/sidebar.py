@@ -50,14 +50,13 @@ def show():
         st.sidebar.title("[ HOW TO USE ]")
         st.sidebar.subheader("PROMPT ENGINEERING")
         st.sidebar.markdown("""
-        1. CLASSIFICATION METHOD
-        2. UPLOAD DATA
-        3. DATA PREPARATION _ COLUMNS TO INCLUDE IN PROMPT
-        4. LM STUDIO SETTING
-        5. CATEGORY TO CLASSIFY
-        6. PROMPT TEMPLATE
-        7. PROMPT OPTIMIZE
-        8. CLASSIFY
+        1. UPLOAD DATA
+        2. DATA PREPARATION _ COLUMNS TO INCLUDE IN PROMPT
+        3. LM STUDIO SETTING
+        4. CATEGORY TO CLASSIFY
+        5. PROMPT TEMPLATE
+        6. PROMPT OPTIMIZE
+        7. CLASSIFY
         """)
     elif classification_method == "FINE TUNING":
         st.sidebar.title("[ HOW TO USE ]")
