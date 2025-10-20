@@ -136,8 +136,8 @@ def show():
             st.subheader("INFERENCE RESULT (Raw)")
             st.dataframe(results_df, width='stretch')
 
-            # 🔍 결과 필터링 UI
-            with st.expander("🔍 결과 필터링", expanded=True):
+            #  결과 필터링 UI
+            with st.expander(" 결과 필터링", expanded=True):
                 unique_labels = results_df["예측_라벨"].unique().tolist() if "예측_라벨" in results_df.columns else []
                 selected_labels = st.multiselect("라벨 선택", unique_labels, default=unique_labels)
 
@@ -148,7 +148,7 @@ def show():
 
                 search_id = st.text_input("출원번호 검색", "")
 
-            # === 필터 적용 ===
+            # 필터 적용
             filtered = results_df.copy()
             if selected_labels:
                 filtered = filtered[filtered["예측_라벨"].isin(selected_labels)]

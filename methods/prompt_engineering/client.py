@@ -3,6 +3,7 @@ import requests, streamlit as st
 
 class LMStudioClient:
     def __init__(self, api_url=None, api_model=None):
+        # API URL과 사용할 모델명
         self.api_url = api_url or st.session_state.get("api_url", "http://localhost:1234/v1/chat/completions")
         self.api_model = api_model or st.session_state.get("api_model")
 
@@ -23,11 +24,7 @@ class LMStudioClient:
         return False
 
     def classify(self, text: str, optimized_prompt: str) -> str:
-        """
-        분류 실행 함수.
-        - optimized_prompt: 옵티마이저가 만든 프롬프트 (카테고리 후보 포함)
-        - text: 분류할 실제 텍스트
-        """
+
         full_prompt = f"""{optimized_prompt}
 
     [분류할 텍스트]

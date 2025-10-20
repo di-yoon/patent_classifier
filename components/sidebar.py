@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 
 def show():
+    #  작업 모드 선택
     st.sidebar.title("[ CLASSIFICATION METHOD ]")
     classification_method = st.sidebar.selectbox(
         "분류 방법 선택",
@@ -11,6 +12,7 @@ def show():
 
     st.sidebar.markdown("---")
 
+    # 데이터 업로드
     st.sidebar.title("[ UPLOAD DATA ]")
     uploaded_file = st.sidebar.file_uploader(
         "데이터 업로드",
@@ -22,6 +24,7 @@ def show():
 
     if uploaded_file is not None:
         try:
+            # 확장자 구분 후 데이터 읽기
             file_extension = uploaded_file.name.split('.')[-1].lower()
             if file_extension == 'csv':
                 df = pd.read_csv(uploaded_file)
@@ -31,10 +34,9 @@ def show():
                 selected_sheet = st.sidebar.selectbox("CHOOSE SHEET", sheet_names)
                 df = pd.read_excel(uploaded_file, sheet_name=selected_sheet)
 
-            #
             st.sidebar.success("데이터 업로드 완료")
 
-            #
+            # 기본 사용할 수 있는 컬럼 후보 (존재 여부 체크)
             default_cols = [col for col in ["발명의 명칭", "요약", "전체청구항"] if col in df.columns]
             st.session_state.default_cols = default_cols
 
@@ -45,7 +47,7 @@ def show():
             st.sidebar.error(e)
 
     st.sidebar.markdown("---")
-
+    # 선택된 분류 방법에 따라 사용 가이드 표시
     if classification_method == "PROMPT ENGINEERING":
         st.sidebar.title("[ HOW TO USE ]")
         st.sidebar.subheader("PROMPT ENGINEERING")

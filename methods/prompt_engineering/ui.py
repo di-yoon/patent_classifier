@@ -1,4 +1,3 @@
-# methods/prompt_engineering/ui.py
 import streamlit as st, pandas as pd, time
 from . import prompts, results
 from .client import LMStudioClient
@@ -7,6 +6,7 @@ from .optimizer import optimize_prompt
 
 class PromptUI:
     def __init__(self):
+        # 세션 상태 초기화
         st.session_state.setdefault("main_prompt", prompts.DEFAULT_PROMPT)
         st.session_state.setdefault("categories", {"": ""})
         st.session_state.setdefault("num_categories", 1)
@@ -14,7 +14,7 @@ class PromptUI:
     def show(self, df):
         st.header("PROMPT ENGINEERING")
 
-        # === Data prep ===
+        # Data prep
         with st.expander("**DATA PREPARATION**", expanded=True):
             st.dataframe(df.head(), width='stretch')
             st.metric("ROWS", len(df))
@@ -24,19 +24,19 @@ class PromptUI:
                 m = st.selectbox("MERGE METHOD", ["SPACE","LINE BREAKS","CUSTOM"])
                 sep = " " if m=="SPACE" else "\n" if m=="LINE BREAKS" else st.text_input("DELIMITER"," | ")
 
-        # === API ===
+        # API
         client = LMStudioClient()
         with st.expander("**LM STUDIO SETTING**"):
             st.text_input("BASE URL", value="http://localhost:1234/v1/chat/completions", disabled=True)
             st.text_input("MODEL", key="api_model")
             if st.button("API CONNECTION"): client.connect()
 
-        # === Category ===
-        # 세션 초기화
+        # Category
         if "categories" not in st.session_state:
             st.session_state.categories = {"": ""}
             st.session_state.num_categories = 1
 
+        # 4. 프롬프트 작성/최적화
         with st.expander("**CATEGORY TO CLASSIFY**", expanded=True):
             updated = {}
             for i in range(st.session_state.num_categories):
@@ -59,7 +59,7 @@ class PromptUI:
                 st.session_state.num_categories = 1
                 st.rerun()
 
-        # === Prompt ===
+        # Prompt
         with st.expander("**PROMPT TEMPLATE**"):
             st.session_state.main_prompt=st.text_area("CLASSIFICATION PROMPT",st.session_state.main_prompt,height=400)
             col1,col2,col3=st.columns(3)
@@ -71,7 +71,7 @@ class PromptUI:
                 st.success("프롬프트가 최적화되었습니다 ")
                 st.rerun()
 
-        # === Run ===
+        # Run
         if st.button("**C L A S S I F Y**", width='stretch'):
             if not st.session_state.get("api_model"):
                 st.warning("LMStudio에서 사용할 모델명을 입력하세요.")
@@ -81,11 +81,11 @@ class PromptUI:
                 st.warning("Please select at least one column to include.")
                 return
 
-            # --- 카테고리 텍스트 구성 ---
+            # 카테고리 텍스트 구성
             categories = st.session_state.categories
             candidate_text = "\n".join([f"{c}: {d}" for c, d in categories.items() if c.strip()])
 
-            # --- 실제 프롬프트 구성 ---
+            # 실제 프롬프트 구성
             optimized_prompt = f"""{st.session_state.main_prompt}
 
         [분류 카테고리 후보]
@@ -109,7 +109,7 @@ class PromptUI:
             st.session_state.classification_results = results_data
             st.toast("DONE")
 
-        # === Results ===
+        # Results
         if st.session_state.classification_results:
             dfres = pd.DataFrame(st.session_state.classification_results)
             st.dataframe(dfres, width='stretch')

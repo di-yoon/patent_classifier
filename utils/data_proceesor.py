@@ -1,10 +1,10 @@
-# utils/data_proceesor.py
 from datasets import Dataset, DatasetDict
 import pandas as pd
 
 class DataProcessor:
     @staticmethod
     def validate_dataframe(df, required_cols=None):
+        #데이터프레임 유효성 검사
         if df is None or len(df) == 0:
             raise ValueError("데이터가 비어 있습니다.")
         if required_cols:
@@ -15,7 +15,7 @@ class DataProcessor:
 
     @staticmethod
     def prepare_data(executor, df, text_col="전체청구항", label_col="사용자태그"):
-        """단일 텍스트 칼럼 + 라벨 칼럼 기반 전처리"""
+        #텍스트 칼럼 + 라벨 칼럼을 기반으로 학습 데이터 준비
         df_copy = df.copy()
 
         if text_col not in df_copy.columns:
@@ -32,7 +32,7 @@ class DataProcessor:
 
         executor.label2id = {l: i for i, l in enumerate(executor.labels_list)}
         executor.id2label = {i: l for l, i in executor.label2id.items()}
-
+        # 학습용 DF 생성
         processed_df = pd.DataFrame({
             "text": df_copy[text_col].astype(str),
             "labels": df_copy[label_col],
@@ -44,13 +44,13 @@ class DataProcessor:
 
     @staticmethod
     def create_balanced_datasetdict(df, tokenizer, test_size=0.2, random_state=25):
-        """라벨별 동일 개수로 train/test 분할"""
+
         label_counts = df['label'].value_counts()
         min_count = label_counts.min()
 
         if min_count < 2:
             raise ValueError("라벨 최소 샘플 수가 너무 적어 학습을 진행할 수 없습니다.")
-
+        # 균등 샘플링
         train_samples_per_label = int(min_count * (1 - test_size))
         test_samples_per_label = min_count - train_samples_per_label
 
@@ -64,7 +64,7 @@ class DataProcessor:
             test_data = label_data.iloc[train_samples_per_label:]
             train_dfs.append(train_data)
             test_dfs.append(test_data)
-
+        # 섞어서 DataFrame 합치기
         train_df = pd.concat(train_dfs, ignore_index=True).sample(frac=1, random_state=random_state)
         test_df = pd.concat(test_dfs, ignore_index=True).sample(frac=1, random_state=random_state)
 

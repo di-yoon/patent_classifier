@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
-from . import handler, schema
+from . import handler
 
 def format_kst(ts_str: str) -> str:
     #UTC -> KST
@@ -70,12 +70,19 @@ def show():
                 st.subheader("Hyperparameter Settings")
 
                 def show_params_as_table(title, cfg_json):
+                    import pandas as pd
                     try:
                         cfg = json.loads(cfg_json) if isinstance(cfg_json, str) else cfg_json
                         if cfg:
                             rows = [{"Parameter": k, "Value": v} for k, v in cfg.items()]
+                            df = pd.DataFrame(rows)
+
+                            #  Arrow 변환 에러 방지
+                            if "Value" in df.columns:
+                                df["Value"] = df["Value"].astype(str)
+
                             st.markdown(f"**{title}**")
-                            st.dataframe(pd.DataFrame(rows), width='stretch', hide_index=True)
+                            st.dataframe(df, width='stretch', hide_index=True)
                         else:
                             st.write(f"{title}: (no data)")
                     except Exception as e:
@@ -208,7 +215,7 @@ def show():
                 except Exception:
                     st.write(row.get("categories", "카테고리 정보 없음"))
 
-                # 결과
+                # 결과rrrr
                 st.subheader("프롬프트 결과")
                 if "run_id" in results_df.columns:
                     results_df["run_id"] = pd.to_numeric(results_df["run_id"], errors="coerce").astype("Int64")

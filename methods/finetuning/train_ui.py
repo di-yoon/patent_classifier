@@ -1,6 +1,4 @@
-# methods/finetuning/train_ui.py
 import os, streamlit as st
-
 from utils.data_proceesor import DataProcessor
 from methods.finetuning.trainer import FineTuningTrainer
 from utils.db_utils import init_train_db, save_train_results
@@ -101,22 +99,19 @@ def show():
         eval_results = {}
 
         try:
-            init_train_db()
-
+            init_train_db()  # DB 초기화
             model_name = st.session_state.get('ft_model_name', 'google/gemma-2-2b')
             hf_token = st.session_state.get('ft_hf_token') or os.getenv('HF_TOKEN')
-
             trainer = FineTuningTrainer(model_name, hf_token)
-
             with st.spinner("INITIALIZING TOKENIZER ..."):
                 trainer.initialize_tokenizer()
-
+            # 데이터 전처리
             with st.spinner("PREPROCESSING DATA ..."):
                 processed_df = DataProcessor.prepare_data(trainer, df, text_col=text_col, label_col=label_col)
                 tokenized_dataset, test_df = DataProcessor.create_balanced_datasetdict(
                     processed_df, trainer.tokenizer, test_size=0.2
                 )
-
+            # 모델 설정
             with st.spinner("CONFIGURING MODEL ..."):
                 bnb_config_params = {
                     'load_in_4bit': True,
@@ -124,7 +119,6 @@ def show():
                     'bnb_4bit_compute_dtype': bnb_4bit_compute_dtype,
                     'bnb_4bit_use_double_quant': bnb_use_double_quant
                 }
-
                 lora_config_params = {
                     'lora_alpha': lora_alpha,
                     'lora_dropout': lora_dropout,
@@ -133,12 +127,11 @@ def show():
                     'task_type': task_type,
                     'target_modules': target_modules
                 }
-
                 trainer.setup_model(bnb_config_params, lora_config_params)
 
+            # 학습 실행
             with st.spinner("TRAINING MODEL ..."):
                 os.makedirs(output_dir, exist_ok=True)
-
                 training_config_params = {
                     'num_train_epochs': num_epochs,
                     'learning_rate': learning_rate,
@@ -149,15 +142,11 @@ def show():
                     'logging_steps': logging_steps,
                     'max_length': max_length
                 }
-
-                #
                 eval_results = trainer.train_model(
                     tokenized_dataset,
                     output_dir,
                     training_config_params
                 )
-
-
                 trainer.save_model(output_dir)
 
                 # 테스트 데이터 저장

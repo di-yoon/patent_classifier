@@ -1,4 +1,3 @@
-# methods/db_viewer/handler.py
 import sqlite3
 import pandas as pd
 from .schema import TRAIN_DB_PATH, INFER_DB_PATH, PROMPT_DB_PATH

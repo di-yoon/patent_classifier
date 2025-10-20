@@ -1,5 +1,3 @@
-# excel_download.py
-
 from io import BytesIO
 import pandas as pd
 import streamlit as st
@@ -15,13 +13,13 @@ def show_promptengineering(results_df, classification_groups):
     with pd.ExcelWriter(excel_buffer, engine = 'openpyxl') as writer:
 
         download_df.to_excel(writer, sheet_name = '전체', index = False)
- 
+        # 카테고리별 시트
         for category, group in classification_groups:
             safe_name = category.replace('/', '_').replace(':', '_')[:31]
             category_df = group[['text', 'classification']].copy()
             category_df.columns = ['TEXT', 'CLASSIFICATION']
             category_df.to_excel(writer, sheet_name = safe_name, index = False)
-
+        # 통계 시트
         stats_df = results_df['classification'].value_counts().reset_index()
         stats_df.columns = ['CLASSIFICATION', 'COUNT']
         stats_df.to_excel(writer, sheet_name = '통계', index = False)
@@ -46,7 +44,7 @@ def show_finetuning(results_df):
     with pd.ExcelWriter(excel_buffer, engine = 'openpyxl') as writer:
         
         results_df.to_excel(writer, sheet_name = '전체', index = False)
-
+        # 라벨별 시트
         if '예측_라벨' in results_df.columns:
 
             classification_groups = results_df.groupby('예측_라벨')
@@ -54,11 +52,11 @@ def show_finetuning(results_df):
             for category, group in classification_groups:
                 safe_name = str(category).replace('/', '_').replace(':', '_')[:31]
                 group.to_excel(writer, sheet_name = safe_name, index = False)
-            
+            # 라벨 분포 통계
             stats_df = results_df['예측_라벨'].value_counts().reset_index()
             stats_df.columns = ['예측_라벨', '개수']
             stats_df.to_excel(writer, sheet_name = '통계', index = False)
-        
+        # 신뢰도 구간 통계
         if '신뢰도' in results_df.columns:
             confidence_ranges = pd.cut(results_df['신뢰도'], 
                                      bins = [0, 0.5, 0.7, 0.85, 1.0], 

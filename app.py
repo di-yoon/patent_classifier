@@ -4,14 +4,13 @@ from methods.prompt_engineering.ui import PromptUI
 import streamlit as st
 from methods.db_viewer import ui as db_viewer
 from utils.db_utils import init_train_db, init_infer_db, init_prompt_db
-
+# DB 초기화
 init_train_db()
 init_infer_db()
 init_prompt_db()
 
-
+# Streamlit 페이지 설정
 st.set_page_config(page_title="특허 문서 분류 자동화 플랫폼", layout="wide")
-
 st.title("특허 문서 분류 자동화 플랫폼")
 st.markdown("---")
 

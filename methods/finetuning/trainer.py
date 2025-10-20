@@ -1,5 +1,3 @@
-# utils/finetuning_trainer.py
-
 import os
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, BitsAndBytesConfig, DataCollatorWithPadding
@@ -155,16 +153,19 @@ class FineTuningTrainer:
 
         return self.trainer.evaluate()
 
-    # 모델 저장 (항상 병합)
-    def save_model(self, output_dir):
-        if self.trainer:
-            # LoRA 어댑터 병합
-            merged_model = self.trainer.model.merge_and_unload()
+    # 모델 저장
+    def save_model(self, output_dir, adapter_subdir="adapter"):
+        if not self.trainer:
+            raise RuntimeError("Trainer가 없습니다. 학습 후에 저장하세요.")
 
-            # 병합 모델 저장
-            merged_output_dir = os.path.join(output_dir, "merged_model")
-            os.makedirs(merged_output_dir, exist_ok=True)
-            merged_model.save_pretrained(merged_output_dir)
-            self.tokenizer.save_pretrained(merged_output_dir)
+        os.makedirs(output_dir, exist_ok=True)
 
-            print(f"병합된 모델이 {merged_output_dir}에 저장되었습니다.")
+        # 토크나이저 저장
+        if self.tokenizer:
+            self.tokenizer.save_pretrained(output_dir)
+
+        # 어댑터만 저장
+        adapter_dir = os.path.join(output_dir, adapter_subdir)
+        os.makedirs(adapter_dir, exist_ok=True)
+        self.trainer.model.save_pretrained(adapter_dir)
+        print(f" Adapter saved to: {adapter_dir}")

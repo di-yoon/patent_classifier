@@ -124,7 +124,7 @@ def init_prompt_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         num_categories INTEGER,
         prompt_template TEXT,
-        categories TEXT,   -- ✅ 추가
+        categories TEXT,  
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     """)

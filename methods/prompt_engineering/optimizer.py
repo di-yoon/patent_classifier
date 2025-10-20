@@ -3,7 +3,7 @@ import requests, streamlit as st
 from .client import LMStudioClient
 
 def _call_llm(messages, max_tokens=700):
-    """ API 호출 """
+    # API 호출
     client = LMStudioClient()
     try:
         r = requests.post(client.api_url, json={
